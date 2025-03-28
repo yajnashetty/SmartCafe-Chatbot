@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-color: #f4f4f4;
+        }
+        #chatbox {
+            width: 400px;
+            height: 400px;
+            border: 1px solid #ccc;
+            overflow-y: auto;
+            margin: auto;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .user-message {
+            text-align: right;
+            background-color: #dcf8c6;
+            padding: 8px;
+            border-radius: 10px;
+            margin: 5px;
+            display: inline-block;
+            max-width: 80%;
+            align-self: flex-end;
+        }
+        .bot-message {
+            text-align: left;
+            background-color: #e0e0e0;
+            padding: 8px;
+            border-radius: 10px;
+            margin: 5px;
+            display: inline-block;
+            max-width: 80%;
+            align-self: flex-start;
+        }
+        input {
+            width: 300px;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+        }
+        button {
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            margin-left: 5px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h2>Welcome to Cafe Chatbot</h2>
+    <div id="chatbox"></div>
+    <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)" autofocus>
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="clearChat()" style="background-color: #dc3545;">Clear Chat</button>
+
+    <script>
+        function sendMessage() {
+            let userInput = document.getElementById("userInput").value.trim();
+            if (userInput === "") return;
+            let chatbox = document.getElementById("chatbox");
+
+            // Display user message
+            let userMessage = document.createElement("p");
+            userMessage.className = "user-message";
+            userMessage.textContent = "You: " + userInput;
+            chatbox.appendChild(userMessage);
+            document.getElementById("userInput").value = "";
+
+            // Send message to Flask API
+            fetch('/chat', {
+                method: 'POST',
+                body: JSON.stringify({ message: userInput }),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                let botMessage = document.createElement("p");
+                botMessage.className = "bot-message";
+                botMessage.textContent = "Bot: " + data.response;
+                chatbox.appendChild(botMessage);
+                chatbox.scrollTop = chatbox.scrollHeight;
+            });
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+
+        function clearChat() {
+            document.getElementById("chatbox").innerHTML = "";
+        }
+    </script>
+</body>
+</html>
